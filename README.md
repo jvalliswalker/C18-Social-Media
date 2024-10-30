@@ -1,4 +1,4 @@
-# C18: Social Media App
+# C18: Social Media API
 
 
 ## Acceptance Criteria
