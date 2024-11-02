@@ -1,8 +1,6 @@
 const router = require('express').Router();
+const userRouter = require('./user-routes');
 
-
-router.get('/', (req, res) => {
-  res.send({'Hello': 'World'});
-})
+router.use('/user', userRouter);
 
 module.exports = router;
