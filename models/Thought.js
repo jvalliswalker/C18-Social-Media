@@ -14,17 +14,21 @@ const thoughtSchema = new Schema(
       default: new Date()
     },
     username: {
-      tyle: String,
+      type: String,
       required: true
     },
     reactions: [reactionSchema]
+  },
+  {
+    toJSON: { virtuals: true }
   }
 )
 
-thoughtSchema.virtual('createdAt').get(() => {
-  return 'hello';
+thoughtSchema.virtual('createdDate').get(function(){
+  const options = { year: 'numeric', month: 'short', day: 'numeric' }
+  return this.createdAt.toLocaleDateString("en-US", options);
 });
 
-const Thought = module('thought', thoughtSchema);
+const Thought = model('thought', thoughtSchema);
 
 module.exports = Thought
