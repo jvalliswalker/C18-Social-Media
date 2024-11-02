@@ -4,19 +4,22 @@ const { awaitWithCatch } = require('../../utils/controllerUtils');
 
 const invalidBodyMessage = 'Invalid user data in request body';
 
-// Request all User documents
+// =====================================================
+// Get all Users
+// =====================================================
 router.get('/', async (req, res) => {
   // Request all Users
   const { result, code } = await awaitWithCatch(
-    User.find()
-    .select(['-__v'])
+    User.find().populate('thoughts').select(['-__v'])
   );
 
   // Send results
   res.status(code).send(result);
 });
 
-// Request User by Id
+// =====================================================
+// Get User by Id
+// =====================================================
 router.get('/:userId', async (req, res) => {
   // Request single User by Id
   const { result, code } = await awaitWithCatch(User.find(
@@ -24,6 +27,7 @@ router.get('/:userId', async (req, res) => {
       _id: req.params.userId
     }
   )
+  .populate('thoughts')
   .select(['-__v'])
   )
 
@@ -31,6 +35,9 @@ router.get('/:userId', async (req, res) => {
   res.status(code).send(result);
 })
 
+// =====================================================
+// Update specific user by Id
+// =====================================================
 router.put('/:userId', async (req, res) => {
 
   // Check that at least one property is present, else return error
@@ -58,7 +65,9 @@ router.put('/:userId', async (req, res) => {
   res.status(code).json(result);
 })
 
+// =====================================================
 // Delete single User by Id
+// =====================================================
 router.delete('/:userId', async (req, res) => {
   // Attempt User delete
   const { result, code } = await awaitWithCatch(User.deleteOne(
@@ -69,7 +78,9 @@ router.delete('/:userId', async (req, res) => {
   res.status(code).json(result);
 })
 
+// =====================================================
 // Create User from POST body
+// =====================================================
 router.post('/', async (req, res) => {
   
   // Extract user data parameters and validate
