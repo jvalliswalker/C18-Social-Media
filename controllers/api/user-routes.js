@@ -7,6 +7,16 @@ router.get('/', async (req, res) => {
   const { result, code } = await awaitWithCatch(User.find({}));
 
   res.status(code).send(result);
+});
+
+router.get('/:userId', async (req, res) => {
+  const { result, code } = await awaitWithCatch(User.find(
+    {
+      _id: req.params.userId
+    }
+  ))
+
+  res.status(code).send(result);
 })
 
 // Create User from POST body
