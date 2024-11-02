@@ -7,7 +7,10 @@ const invalidBodyMessage = 'Invalid user data in request body';
 // Request all User documents
 router.get('/', async (req, res) => {
   // Request all Users
-  const { result, code } = await awaitWithCatch(User.find({}));
+  const { result, code } = await awaitWithCatch(
+    User.find()
+    .select(['-__v'])
+  );
 
   // Send results
   res.status(code).send(result);
@@ -20,7 +23,9 @@ router.get('/:userId', async (req, res) => {
     {
       _id: req.params.userId
     }
-  ))
+  )
+  .select(['-__v'])
+  )
 
   // Send results
   res.status(code).send(result);
