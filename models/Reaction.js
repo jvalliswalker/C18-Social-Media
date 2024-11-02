@@ -23,7 +23,7 @@ const reactionSchema = new Schema(
   }
 )
 
-reactionSchema.virtual('createdAt').get(() => {
+reactionSchema.virtual('createdDate').get(() => {
   return this.createdAt;
 })
 
