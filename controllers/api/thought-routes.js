@@ -67,6 +67,11 @@ router.post('/', async (req, res) => {
       }
   ));
 
+  // Return error if found
+  if(code >= 300){
+    res.status(code).json(result);
+  }
+
   // Add new thought to User record
   user.thoughts.push(result);
   await user.save();
