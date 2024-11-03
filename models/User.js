@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 const { emailRegex } = require('../utils/modelUtils');
+const Thought = require('./Thought');
 
 const userSchema = new Schema(
   {
@@ -33,9 +34,22 @@ const userSchema = new Schema(
   }
 );
 
+// Create friend count virtual
 userSchema.virtual('friendCount').get(function(){
   return this.friends.length;
 })
+
+// Delete related Thought documents on User deletion
+userSchema.pre(
+  'deleteOne', 
+  { document: true, query: false },
+  async function() {
+    await Thought.deleteMany({
+      _id: { $in: this.thoughts }
+    });
+  }
+);
+
 
 const User = model('user', userSchema);
 
