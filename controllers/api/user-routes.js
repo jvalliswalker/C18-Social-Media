@@ -111,11 +111,28 @@ router.post("/:userId/friends/:friendId", async (req, res) => {
   // Add friend Id to user's friends array
   const user = userQueryResult.result;
 
+  // Guard clause if no user found
+  if (!user) {
+    res
+      .status(400)
+      .json({ message: `No user found with Id ${req.params.userId}` });
+    return;
+  }
+
+  // Guard clause if friend already present in friends list
+  if (user.friends.map((x) => x._id.toString()).includes(req.params.friendId)) {
+    res.status(400).json({
+      message: `User with Id ${req.params.userId} already has a friend with user ${req.params.friendId}`,
+    });
+    return;
+  }
+
+  // Update friends list
   user.friends.push(req.params.friendId);
   await user.save();
 
   // Send response
-  res.status(201).json(user);
+  res.status(201).json({ message: "Friend successfully added" });
 });
 
 // =====================================================
@@ -137,7 +154,7 @@ router.delete("/:userId", async (req, res) => {
   await user.deleteOne();
 
   // Send response
-  res.status(200).send();
+  res.status(200).json({ message: "delete successful" });
 });
 
 // =====================================================
@@ -158,11 +175,20 @@ router.delete("/:userId/friends/:friendId", async (req, res) => {
   // Pull friend Id from User's friend list
   const user = userQueryResult.result;
 
+  // No user found guard clause
+  if (!user) {
+    res
+      .status(400)
+      .json({ message: `No user found with Id ${req.params.userId}` });
+    return;
+  }
+
+  // Pull friend with passed friend Id
   user.friends.pull(req.params.friendId);
   await user.save();
 
   // Send response
-  res.status(200).json(user);
+  res.status(200).json({ message: "delete successful" });
 });
 
 module.exports = router;
