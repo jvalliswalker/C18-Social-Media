@@ -10,7 +10,10 @@ const invalidBodyMessage = 'Invalid user data in request body';
 router.get('/', async (req, res) => {
   // Request all Users
   const { result, code } = await awaitWithCatch(
-    User.find().populate('thoughts').select(['-__v'])
+    User.find()
+    .populate('thoughts')
+    .populate('friends')
+    .select(['-__v'])
   );
 
   // Send results
@@ -28,6 +31,7 @@ router.get('/:userId', async (req, res) => {
     }
   )
   .populate('thoughts')
+  .populate('friends')
   .select(['-__v'])
   )
 
@@ -66,19 +70,6 @@ router.put('/:userId', async (req, res) => {
 })
 
 // =====================================================
-// Delete single User by Id
-// =====================================================
-router.delete('/:userId', async (req, res) => {
-  // Attempt User delete
-  const { result, code } = await awaitWithCatch(User.deleteOne(
-    { _id: req.params.userId }
-  ))
-
-  // Send response
-  res.status(code).json(result);
-})
-
-// =====================================================
 // Create User from POST body
 // =====================================================
 router.post('/', async (req, res) => {
@@ -103,6 +94,77 @@ router.post('/', async (req, res) => {
 
   // Send response
   res.status(code).json(result);
+})
+
+// =====================================================
+// Add User to Friend List
+// =====================================================
+router.post('/:userId/friends/:friendId', async (req, res) => {
+  
+  // Attempt User creation
+  const userQueryResult = await awaitWithCatch(
+    User.findOne({ _id: req.params.userId }
+  ));
+
+  // Send error response if query failed
+  if(userQueryResult.code >= 300){
+    res.status(userQueryResult.code).json(userQueryResult.result);
+  }
+
+  // Add friend Id to user's friends array
+  const user = userQueryResult.result;
+
+  user.friends.push(req.params.friendId);
+  await user.save();
+
+  // Send response
+  res.status(201).json(user);
+})
+
+// =====================================================
+// Delete single User by Id
+// =====================================================
+router.delete('/:userId', async (req, res) => {
+  // Attempt User delete
+  const userQueryResult = await awaitWithCatch(User.findOne(
+    { _id: req.params.userId }
+  ));
+
+  if(userQueryResult.code >= 300){
+    res.status(userQueryResult.code).json(userQueryResult.result);
+  }
+
+  const user = userQueryResult.result;
+
+  await user.deleteOne();
+
+  // Send response
+  res.status(200).send();
+})
+
+// =====================================================
+// Delete friend from User's friends list
+// =====================================================
+router.delete('/:userId/friends/:friendId', async (req, res) => {
+  // Attempt User delete
+  const userQueryResult = await awaitWithCatch(
+    User.findOne({ _id: req.params.userId })
+    .populate('friends')
+  );
+
+  // Return error message if error occurred
+  if(userQueryResult.code >= 300){
+    res.status(userQueryResult.code).json(userQueryResult.result);
+  }
+
+  // Pull friend Id from User's friend list
+  const user = userQueryResult.result;
+
+  user.friends.pull(req.params.friendId);
+  await user.save()
+
+  // Send response
+  res.status(200).json(user);
 })
 
 module.exports = router;
