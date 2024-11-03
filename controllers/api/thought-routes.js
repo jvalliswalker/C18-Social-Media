@@ -69,7 +69,7 @@ router.post('/', async (req, res) => {
 
   // Add new thought to User record
   user.thoughts.push(result);
-  user.save();
+  await user.save();
 
   // Send result
   res.status(code).json(result);
@@ -116,5 +116,71 @@ router.delete('/:thoughtId', async (req, res) => {
   // Send result
   res.status(code).json(result);
 })
+
+// =====================================================
+// Add Reaction to Thought by Id
+// =====================================================
+router.post('/:thoughtId/reactions', async (req, res) => {
+
+  // Query parent Thought
+  const queriedThought = await awaitWithCatch(
+    Thought.findOne(
+      { _id: req.params.thoughtId }
+    )
+    .populate('reactions')
+  );
+
+  // Send error if query failed
+  if (queriedThought.code >= 300){
+    res.status(queriedThought.code).json(queriedThought.result);
+  }
+
+  const thought = queriedThought.result;
+
+  // Validate POST body
+  if(!req.body.reactionBody || !req.body.username){
+    res.status(500).json(invalidBodyMessage);
+  }
+
+  thought.reactions.push(
+    {
+      reactionBody: req.body.reactionBody,
+      username: req.body.username
+    }
+  );
+
+  await thought.save();
+
+  // Send result
+  res.status(201).send();
+})
+
+// =====================================================
+// Delete Reaction by Id
+// =====================================================
+router.delete('/:thoughtId/reactions/:reactionId', async (req, res) => {
+
+  // Query parent Thought
+  const queriedThought = await awaitWithCatch(
+    Thought.findOne(
+      { _id: req.params.thoughtId }
+    )
+    .populate('reactions')
+  );
+
+  // Send error if query failed
+  if (queriedThought.code >= 300){
+    res.status(code).json(queriedThought.result);
+  }
+
+  const thought = queriedThought.result;
+
+  thought.reactions.pull(req.params.reactionId);
+
+  // Send result
+  res.status(200).json(thought);
+})
+
+
 
 module.exports= router;
