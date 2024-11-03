@@ -44,6 +44,7 @@ router.post('/', async (req, res) => {
     res.status(400).json(
       { message: invalidBodyMessage }
     );
+    return;
   }
 
   // Search for User, return error if not found
@@ -51,9 +52,13 @@ router.post('/', async (req, res) => {
     User.find({ _id: userId })
   );
 
-  if(userQueryResults.code >= 300 ){
+  if(userQueryResults.code >= 300 || !userQueryResults.result ){
     res.status(userQueryResults.code).json(userQueryResults.result);
+    return;
   }
+
+  console.log('oops!');
+  
 
   const user = userQueryResults.result[0];
 
@@ -70,6 +75,7 @@ router.post('/', async (req, res) => {
   // Return error if found
   if(code >= 300){
     res.status(code).json(result);
+    return;
   }
 
   // Add new thought to User record
@@ -90,6 +96,7 @@ router.put('/:thoughtId', async (req, res) => {
 
   if(!thoughtText && !userId){
     res.status(500).send(invalidBodyMessage)
+    return;
   }
 
 
@@ -138,6 +145,7 @@ router.post('/:thoughtId/reactions', async (req, res) => {
   // Send error if query failed
   if (queriedThought.code >= 300){
     res.status(queriedThought.code).json(queriedThought.result);
+    return;
   }
 
   const thought = queriedThought.result;
@@ -145,6 +153,7 @@ router.post('/:thoughtId/reactions', async (req, res) => {
   // Validate POST body
   if(!req.body.reactionBody || !req.body.username){
     res.status(500).json(invalidBodyMessage);
+    return;
   }
 
   thought.reactions.push(
@@ -176,6 +185,7 @@ router.delete('/:thoughtId/reactions/:reactionId', async (req, res) => {
   // Send error if query failed
   if (queriedThought.code >= 300){
     res.status(code).json(queriedThought.result);
+    return;
   }
 
   const thought = queriedThought.result;

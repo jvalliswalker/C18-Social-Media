@@ -49,6 +49,7 @@ router.put('/:userId', async (req, res) => {
 
   if(!username && !email && !thoughts){
     res.status(500).json({ message: invalidBodyMessage });
+    return;
   }
 
   // Build updater object
@@ -81,6 +82,7 @@ router.post('/', async (req, res) => {
     res.status(400).json(
       { message: invalidBodyMessage }
     )
+    return;
   }
 
   // Attempt User creation
@@ -109,6 +111,7 @@ router.post('/:userId/friends/:friendId', async (req, res) => {
   // Send error response if query failed
   if(userQueryResult.code >= 300){
     res.status(userQueryResult.code).json(userQueryResult.result);
+    return;
   }
 
   // Add friend Id to user's friends array
@@ -132,6 +135,7 @@ router.delete('/:userId', async (req, res) => {
 
   if(userQueryResult.code >= 300){
     res.status(userQueryResult.code).json(userQueryResult.result);
+    return;
   }
 
   const user = userQueryResult.result;
@@ -155,6 +159,7 @@ router.delete('/:userId/friends/:friendId', async (req, res) => {
   // Return error message if error occurred
   if(userQueryResult.code >= 300){
     res.status(userQueryResult.code).json(userQueryResult.result);
+    return;
   }
 
   // Pull friend Id from User's friend list
