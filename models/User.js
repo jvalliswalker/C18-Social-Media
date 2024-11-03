@@ -1,6 +1,6 @@
-const { Schema, model } = require('mongoose');
-const { emailRegex } = require('../utils/modelUtils');
-const Thought = require('./Thought');
+const { Schema, model } = require("mongoose");
+const { emailRegex } = require("../utils/modelUtils");
+const Thought = require("./Thought");
 
 const userSchema = new Schema(
   {
@@ -8,49 +8,48 @@ const userSchema = new Schema(
       type: String,
       trim: true,
       required: true,
-      unique: true
+      unique: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
-      match: [emailRegex, 'Please provide a valid email address']
+      match: [emailRegex, "Please provide a valid email address"],
     },
     thoughts: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'thought'
-      }
+        ref: "thought",
+      },
     ],
     friends: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'user'
-      }
-    ]
+        ref: "user",
+      },
+    ],
   },
   {
-    toJSON: { virtuals: true }
+    toJSON: { virtuals: true },
   }
 );
 
 // Create friend count virtual
-userSchema.virtual('friendCount').get(function(){
+userSchema.virtual("friendCount").get(function () {
   return this.friends.length;
-})
+});
 
 // Delete related Thought documents on User deletion
 userSchema.pre(
-  'deleteOne', 
+  "deleteOne",
   { document: true, query: false },
-  async function() {
+  async function () {
     await Thought.deleteMany({
-      _id: { $in: this.thoughts }
+      _id: { $in: this.thoughts },
     });
   }
 );
 
-
-const User = model('user', userSchema);
+const User = model("user", userSchema);
 
 module.exports = User;
